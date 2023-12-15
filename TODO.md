@@ -1,6 +1,5 @@
 # General
 
-* make test tables easier to read by removing the need to add a trailing newline in every test case
 * can the assembly contain unicode which is not only ASCII?
 * profile the assembler using Pong. What is something I could improve?
 

@@ -187,8 +187,7 @@ func TestParse(t *testing.T) {
 			want: nil,
 		},
 		"IgnoresCommentLines": {
-			in: `// This is a comment
-`,
+			in:   `// This is a comment`,
 			want: nil,
 		},
 		"IgnoresTrailingComments": {
@@ -398,7 +397,7 @@ func TestCode(t *testing.T) {
 					Value: 5,
 				},
 			},
-			want: "0000000000000101\n",
+			want: "0000000000000101",
 		},
 		"@variable": {
 			in: []instruction{
@@ -412,8 +411,7 @@ func TestCode(t *testing.T) {
 				},
 			},
 			want: `0000000000010000
-0000000000010001
-`,
+0000000000010001`,
 		},
 		"D=A": {
 			in: []instruction{
@@ -422,7 +420,7 @@ func TestCode(t *testing.T) {
 					Comp: "A",
 				},
 			},
-			want: "1110110000010000\n",
+			want: "1110110000010000",
 		},
 		"D=D+A": {
 			in: []instruction{
@@ -431,7 +429,7 @@ func TestCode(t *testing.T) {
 					Comp: "D+A",
 				},
 			},
-			want: "1110000010010000\n",
+			want: "1110000010010000",
 		},
 		"M=D": {
 			in: []instruction{
@@ -440,7 +438,7 @@ func TestCode(t *testing.T) {
 					Comp: "D",
 				},
 			},
-			want: "1110001100001000\n",
+			want: "1110001100001000",
 		},
 		"LabelDeclarationDoesNotResultInAnInstruction": {
 			in: []instruction{
@@ -452,7 +450,7 @@ func TestCode(t *testing.T) {
 					Comp: "A",
 				},
 			},
-			want: "1110110000010000\n",
+			want: "1110110000010000",
 		},
 		"LabelUseBeforeDeclaration": {
 			in: []instruction{
@@ -474,8 +472,7 @@ func TestCode(t *testing.T) {
 			},
 			want: `0000000000000010
 0000000000001111
-1110110000010000
-`,
+1110110000010000`,
 		},
 	}
 
@@ -485,7 +482,8 @@ func TestCode(t *testing.T) {
 			err := code(tc.in, b)
 			assertNoError(t, err)
 
-			assertDeepEquals(t, "Code", tc.in, b.String(), tc.want)
+			want := tc.want + "\n"
+			assertDeepEquals(t, "Code", tc.in, b.String(), want)
 		})
 	}
 
