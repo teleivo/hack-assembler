@@ -182,8 +182,7 @@ func TestParse(t *testing.T) {
 		want []instruction
 	}{
 		"IgnoresEmptylines": {
-			in: `
-`,
+			in:   "\n",
 			want: nil,
 		},
 		"IgnoresCommentLines": {
@@ -209,7 +208,7 @@ func TestParse(t *testing.T) {
 			},
 		},
 		"IgnoresTabs": {
-			in: `	D=M`,
+			in: "\tD=M",
 			want: []instruction{
 				&cInstruction{
 					Dest: "D",
@@ -228,50 +227,6 @@ func TestParse(t *testing.T) {
 	}
 
 	// TODO add error test cases.
-}
-
-func TestParseCInstruction(t *testing.T) {
-	tests := map[string]struct {
-		in   string
-		want instruction
-	}{
-		"DestAndComp": {
-			in: `D=M`,
-			want: &cInstruction{
-				Dest: "D",
-				Comp: "M",
-				Jump: "",
-			},
-		},
-		"CompAndJump": {
-			in: `D;JEQ`,
-			want: &cInstruction{
-				Dest: "",
-				Comp: "D",
-				Jump: "JEQ",
-			},
-		},
-		"CompAndJumpWithWhitespace": {
-			in: `D ; JEQ`,
-			want: &cInstruction{
-				Dest: "",
-				Comp: "D",
-				Jump: "JEQ",
-			},
-		},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			got, err := parseCInstruction(tc.in)
-			assertNoError(t, err)
-
-			assertDeepEquals(t, "parseCInstruction", tc.in, got, tc.want)
-		})
-	}
-	// TODO add some error cases.
-	// mnemonics need to be upper case.
-	// dest or jump can be omitted not both
 }
 
 func TestParseAInstruction(t *testing.T) {
@@ -342,6 +297,50 @@ func TestParseAInstruction(t *testing.T) {
 	}
 }
 
+func TestParseCInstruction(t *testing.T) {
+	tests := map[string]struct {
+		in   string
+		want instruction
+	}{
+		"DestAndComp": {
+			in: `D=M`,
+			want: &cInstruction{
+				Dest: "D",
+				Comp: "M",
+				Jump: "",
+			},
+		},
+		"CompAndJump": {
+			in: `D;JEQ`,
+			want: &cInstruction{
+				Dest: "",
+				Comp: "D",
+				Jump: "JEQ",
+			},
+		},
+		"CompAndJumpWithWhitespace": {
+			in: `D ; JEQ`,
+			want: &cInstruction{
+				Dest: "",
+				Comp: "D",
+				Jump: "JEQ",
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			got, err := parseCInstruction(tc.in)
+			assertNoError(t, err)
+
+			assertDeepEquals(t, "parseCInstruction", tc.in, got, tc.want)
+		})
+	}
+	// TODO add some error cases.
+	// mnemonics need to be upper case.
+	// dest or jump can be omitted not both
+}
+
 func TestParseLabel(t *testing.T) {
 	tests := map[string]struct {
 		in   string
@@ -410,7 +409,8 @@ func TestCode(t *testing.T) {
 					IsSymbol: true,
 				},
 			},
-			want: `0000000000010000
+			want: `
+0000000000010000
 0000000000010001`,
 		},
 		"D=A": {
@@ -470,7 +470,8 @@ func TestCode(t *testing.T) {
 					Comp: "A",
 				},
 			},
-			want: `0000000000000010
+			want: `
+0000000000000010
 0000000000001111
 1110110000010000`,
 		},
@@ -482,7 +483,10 @@ func TestCode(t *testing.T) {
 			err := code(tc.in, b)
 			assertNoError(t, err)
 
-			want := tc.want + "\n"
+			// allow newlines to align tc.want machine code when tests include multiple instructions
+			// trailing newline is added to the machine code; keeping it out of tc.want so the
+			// table-driven tests are easier to read and write.
+			want := strings.TrimSpace(tc.want) + "\n"
 			assertDeepEquals(t, "Code", tc.in, b.String(), want)
 		})
 	}
